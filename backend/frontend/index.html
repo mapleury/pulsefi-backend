@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseFi | Financial Behavior Mirror</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <span class="pulse-icon">⚡</span> PulseFi
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Opportunity Hub</a>
+        </div>
+    </nav>
+
+    <main class="dashboard-grid">
+        <section class="card identity-card slide-up">
+            <div class="card-header">
+                <h3>Financial Identity</h3>
+                <span class="badge" id="health-status">Analyzing...</span>
+            </div>
+            <h1 id="identity-name">Strategist</h1>
+            <p id="identity-desc">Memuat cermin keuanganmu...</p>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <span class="stat-label">Savings Rate</span>
+                    <strong id="savings-rate">0%</strong>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Top Expense</span>
+                    <strong id="top-category">-</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="card action-card slide-up" style="animation-delay: 0.1s;">
+            <h3>Quick Pulse</h3>
+            <p class="subtitle">Catat aktivitas keuanganmu hari ini.</p>
+            
+            <div class="input-group">
+                <input type="text" id="amount" placeholder="Jumlah (contoh: 50.000)">
+            </div>
+            
+            <div class="input-row">
+                <select id="category">
+                    <option value="Food/Hustle">🍔 Food/Hustle</option>
+                    <option value="Self-Care">💆‍♀️ Self-Care</option>
+                    <option value="Subscriptions">📱 Subscriptions</option>
+                    <option value="Entertainment">🎬 Entertainment</option>
+                    <option value="Fixed Needs">🏠 Fixed Needs</option>
+                </select>
+                <select id="type">
+                    <option value="expense">Expense (-)</option>
+                    <option value="income">Income (+)</option>
+                </select>
+            </div>
+            
+            <button onclick="addTransaction()" class="btn-primary">Pulse It!</button>
+        </section>
+
+      <section class="card goal-card slide-up" style="animation-delay: 0.2s;">
+    <h3>Goal Momentum</h3>
+
+    <!-- CREATE -->
+    <div class="input-group">
+        <input type="text" id="goal-name" placeholder="Goal name (e.g. Macbook)">
+        <input type="number" id="goal-target" placeholder="Target (e.g. 15000000)">
+        <button onclick="createGoal()" class="btn-primary">Add Goal</button>
+    </div>
+
+    <!-- DISPLAY -->
+    <div id="goal-container"></div>
+</section>
+        <section class="card history-card slide-up" style="animation-delay: 0.3s;">
+            <h3>Recent Transactions</h3>
+            <ul id="transaction-list" class="transaction-list">
+                </ul>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
