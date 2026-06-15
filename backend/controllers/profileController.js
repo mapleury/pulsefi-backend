@@ -1,35 +1,47 @@
-const db = require('../database');
+const db = require('../database/init');
+const bcrypt = require('bcryptjs');
 
-exports.getPulse = async (req, res) => {
+// Ambil data profile
+exports.getProfile = async (req, res) => {
     try {
-        // Fetch profile and recent transaction stats
-        const profile = await db.get("SELECT * FROM profiles LIMIT 1");
-        const stats = await db.get(`
-            SELECT 
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_spent,
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_earned
-            FROM transactions
-        `);
+        const profile = await db.getAsync(
+            `SELECT p.*, u.username FROM profiles p 
+             JOIN users u ON p.user_id = u.id 
+             WHERE p.user_id = ?`, [req.userId]
+        );
+        res.json(profile);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
-        // Calculate Pulse Score (0-100)
-        let pulseScore = 50;
-        if (stats.total_earned > 0) {
-            pulseScore = Math.round(((stats.total_earned - stats.total_spent) / stats.total_earned) * 100);
-        }
+// Update Nama & Image (URL)
+exports.updateProfile = async (req, res) => {
+    const { name, image_url } = req.body;
+    try {
+        await db.runAsync(
+            `UPDATE profiles SET name = ?, image_url = ? WHERE user_id = ?`,
+            [name, image_url, req.userId]
+        );
+        res.json({ message: "Profile updated!" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Ubah Password dengan Verifikasi Password Lama
+exports.changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    try {
+        const user = await db.getAsync("SELECT password FROM users WHERE id = ?", [req.userId]);
         
-        // Clamp between 0 and 100
-        pulseScore = Math.max(0, Math.min(100, pulseScore));
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) return res.status(400).json({ error: "Password lama salah!" });
 
-        // Update Identity based on Pulse
-        let identity = 'Explorer';
-        if (pulseScore > 80) identity = 'Mastermind';
-        else if (pulseScore > 40) identity = 'Strategist';
-        else identity = 'Survivor';
-
-        await db.run("UPDATE profiles SET pulse_score = ?, identity_type = ? WHERE id = ?", 
-            [pulseScore, identity, profile.id]);
-
-        res.json({ pulseScore, identity, stats });
+        const hashedPw = await bcrypt.hash(newPassword, 10);
+        await db.runAsync("UPDATE users SET password = ? WHERE id = ?", [hashedPw, req.userId]);
+        
+        res.json({ message: "Password berhasil diubah!" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

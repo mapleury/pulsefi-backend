@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = window.PULSEFI_API_URL || `${window.location.origin}/api`;
 let currentUser = null;
 let transactionChart = null; // Holds the Chart.js instance
 

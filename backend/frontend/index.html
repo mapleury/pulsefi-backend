@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <script>
+      window.PULSEFI_API_URL = window.location.origin && window.location.origin !== 'null'
+        ? `${window.location.origin}/api`
+        : 'http://localhost:3000/api';
+    </script>
     <nav class="navbar">
         <div class="logo">
             <span class="pulse-icon">⚡</span> PulseFi

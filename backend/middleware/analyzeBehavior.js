@@ -1,28 +1,42 @@
-const db = require('../database');
+const db = require('../database/init');
 
-const analyzeBehavior = async (req, res, next) => {
-    const { type, category } = req.body;
-
+module.exports = async (req, res, next) => {
     try {
-        if (type === 'expense' && category !== 'Fixed Needs') {
-            // Using getAsync to match your DB utility pattern
-            const result = await db.getAsync(`
-                SELECT COUNT(*) as count FROM transactions 
-                WHERE date > datetime('now', '-1 day') 
-                AND category != 'Fixed Needs'
-            `);
+        const userId = req.userId;
+        const today = new Date().toISOString().split('T')[0];
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-            if (result && result.count >= 5) {
-                console.log("⚠️ Impulse Spike Detected!");
-                req.impulseWarning = true;
+        const streak = await db.getAsync("SELECT * FROM streaks WHERE user_id = ?", [userId]);
+        
+        if (streak) {
+            if (streak.last_check_date !== today) {
+                let newStreak;
+
+                if (streak.last_check_date === yesterdayStr) {
+                    newStreak = streak.current_streak + 1;
+                } else {
+                    newStreak = 1;
+                }
+
+                const newLongest = Math.max(newStreak, streak.longest_streak);
+                
+                await db.runAsync(
+                    "UPDATE streaks SET current_streak = ?, longest_streak = ?, last_check_date = ? WHERE user_id = ?",
+                    [newStreak, newLongest, today, userId]
+                );
             }
+        } else {
+            await db.runAsync(
+                "INSERT INTO streaks (user_id, current_streak, longest_streak, last_check_date) VALUES (?, 1, 1, ?)",
+                [userId, today]
+            );
         }
         next();
     } catch (err) {
-        console.error("Middleware Error:", err.message);
-        // We call next() anyway so the transaction still saves even if analysis fails
-        next();
+        console.error("Streak Middleware Error:", err);
+        next(); 
     }
 };
-
-module.exports = analyzeBehavior;
