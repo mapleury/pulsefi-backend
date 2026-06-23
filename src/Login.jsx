@@ -14,13 +14,20 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    
     try {
-      const res = await fetch(`${API_URL}/login`, {
+      // Perbaikan Rute: Membersihkan trailing slash (jika ada) dan mengarahkannya ke /api/login
+      const baseUrl = API_URL.replace(/\/$/, "");
+      const endpoint = `${baseUrl}/api/login`;
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       });
+      
       const data = await res.json();
+      
       if (res.ok) {
         localStorage.setItem('pulsefi_token', data.token);
         localStorage.setItem('pulsefi_user', data.username);
@@ -29,7 +36,8 @@ export default function Login() {
         setError(data.error || "Akses ditolak.");
       }
     } catch (err) {
-      setError("Server Offline.");
+      console.error("Fetch Error:", err);
+      setError("Server Offline atau terjadi masalah koneksi.");
     } finally {
       setLoading(false);
     }

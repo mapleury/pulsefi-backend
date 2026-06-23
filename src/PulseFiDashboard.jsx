@@ -32,8 +32,11 @@ export default function PulseFiDashboard() {
     const token = localStorage.getItem('pulsefi_token');
     if (!token) return;
 
+    // PERBAIKAN: Pastikan URL bersih dan masuk ke rute /api
+    const baseUrl = API_URL.replace(/\/$/, "");
+
     try {
-      const res = await fetch(`${API_URL}/ai/advice`, {
+      const res = await fetch(`${baseUrl}/api/ai/advice`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -54,12 +57,15 @@ export default function PulseFiDashboard() {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     };
 
+    // PERBAIKAN: Pastikan URL bersih dan masuk ke rute /api
+    const baseUrl = API_URL.replace(/\/$/, "");
+
     try {
       const [summaryRes, weeklyRes, recentRes, profileRes] = await Promise.allSettled([
-        fetch(`${API_URL}/transactions/summary`, requestOptions),
-        fetch(`${API_URL}/transactions/weekly`, requestOptions),
-        fetch(`${API_URL}/transactions/recent`, requestOptions),
-        fetch(`${API_URL}/profile`, requestOptions)
+        fetch(`${baseUrl}/api/transactions/summary`, requestOptions),
+        fetch(`${baseUrl}/api/transactions/weekly`, requestOptions),
+        fetch(`${baseUrl}/api/transactions/recent`, requestOptions),
+        fetch(`${baseUrl}/api/profile`, requestOptions)
       ]);
 
       if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
@@ -105,7 +111,7 @@ export default function PulseFiDashboard() {
       clearInterval(interval);
       clearInterval(aiInterval);
     };
-  }, []); 
+  }, [getDashboardData, getAIAdvice]); 
 
   const pulseSpeed = pulse.score > 70 ? '3s' : pulse.score > 40 ? '1.5s' : '0.6s';
   const getCategoryIcon = (cat) => {

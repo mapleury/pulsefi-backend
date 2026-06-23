@@ -7,9 +7,13 @@ export default function Insight() {
   const [data, setData] = useState({ summary: { income: 0, expense: 0, savings: 0 }, categories: [] });
   const [loading, setLoading] = useState(true);
 
+  // PERBAIKAN: Membersihkan trailing slash
+  const baseUrl = API_URL.replace(/\/$/, "");
+
   const fetchInsights = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/insights`, {
+      // PERBAIKAN: Menambahkan rute /api
+      const res = await fetch(`${baseUrl}/api/insights`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('pulsefi_token')}` }
       });
       
@@ -22,7 +26,7 @@ export default function Insight() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [baseUrl]);
 
   useEffect(() => { fetchInsights(); }, [fetchInsights]);
 

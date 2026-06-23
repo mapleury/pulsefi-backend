@@ -11,6 +11,9 @@ export default function Mentor() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
 
+  // PERBAIKAN: Membersihkan trailing slash untuk mencegah double slash
+  const baseUrl = API_URL.replace(/\/$/, "");
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -26,7 +29,8 @@ export default function Mentor() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/ai/chat`, {
+      // PERBAIKAN: Menambahkan rute /api agar sesuai dengan backend
+      const res = await fetch(`${baseUrl}/api/ai/chat`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

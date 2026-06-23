@@ -42,6 +42,9 @@ export default function Transactions() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // PERBAIKAN: Membersihkan trailing slash
+  const baseUrl = API_URL.replace(/\/$/, "");
+
   const getAuthHeader = () => ({
     'Authorization': `Bearer ${localStorage.getItem('pulsefi_token')}`,
     'Content-Type': 'application/json'
@@ -49,20 +52,22 @@ export default function Transactions() {
 
   const fetchTransactions = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/transactions`, { headers: getAuthHeader() });
+      // PERBAIKAN: Menambahkan rute /api
+      const res = await fetch(`${baseUrl}/api/transactions`, { headers: getAuthHeader() });
       if (res.status === 401) { window.location.href = "/login"; return; }
       const data = await res.json();
       if (Array.isArray(data)) setTransactions(data);
     } catch (err) { console.error("Fetch error:", err); }
-  }, []);
+  }, [baseUrl]);
 
   const fetchGoals = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/goals`, { headers: getAuthHeader() });
+      // PERBAIKAN: Menambahkan rute /api
+      const res = await fetch(`${baseUrl}/api/goals`, { headers: getAuthHeader() });
       const data = await res.json();
       if (Array.isArray(data)) setGoals(data);
     } catch (err) { console.error("Error fetching goals:", err); }
-  }, []);
+  }, [baseUrl]);
 
   useEffect(() => { 
     fetchTransactions(); 
@@ -106,7 +111,8 @@ export default function Transactions() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const url = editingId ? `${API_URL}/transactions/${editingId}` : `${API_URL}/transactions`;
+    // PERBAIKAN: Menambahkan rute /api pada POST dan PUT
+    const url = editingId ? `${baseUrl}/api/transactions/${editingId}` : `${baseUrl}/api/transactions`;
     try {
       const res = await fetch(url, {
         method: editingId ? 'PUT' : 'POST',
@@ -120,7 +126,8 @@ export default function Transactions() {
   const handleDelete = async (id) => {
     if (!window.confirm("Hapus transaksi?")) return;
     try {
-      const res = await fetch(`${API_URL}/transactions/${id}`, { 
+      // PERBAIKAN: Menambahkan rute /api pada DELETE
+      const res = await fetch(`${baseUrl}/api/transactions/${id}`, { 
         method: 'DELETE', headers: getAuthHeader() 
       });
       if (res.ok) { fetchTransactions(); fetchGoals(); }

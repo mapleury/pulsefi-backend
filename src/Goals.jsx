@@ -16,6 +16,9 @@ export default function Goals() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
+  // PERBAIKAN: Membersihkan trailing slash
+  const baseUrl = API_URL.replace(/\/$/, "");
+
   const getAuthHeader = () => ({
     'Authorization': `Bearer ${localStorage.getItem('pulsefi_token')}`,
     'Content-Type': 'application/json'
@@ -23,12 +26,13 @@ export default function Goals() {
 
   const fetchGoals = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/goals`, { headers: getAuthHeader() });
+      // PERBAIKAN: Menambahkan rute /api
+      const res = await fetch(`${baseUrl}/api/goals`, { headers: getAuthHeader() });
       if (res.status === 401 || res.status === 403) { window.location.href = "/login"; return; }
       const data = await res.json();
       if (Array.isArray(data)) setGoals(data);
     } catch (err) { console.error("Fetch error:", err); }
-  }, []);
+  }, [baseUrl]);
 
   useEffect(() => { fetchGoals(); }, [fetchGoals]);
 
@@ -42,10 +46,10 @@ export default function Goals() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const baseUrl = `${API_URL}/goals`;
-    const url = editingId ? `${baseUrl}/${editingId}` : baseUrl;
+    // PERBAIKAN: Menambahkan rute /api pada POST dan PUT
+    const targetUrl = editingId ? `${baseUrl}/api/goals/${editingId}` : `${baseUrl}/api/goals`;
     try {
-      const res = await fetch(url, {
+      const res = await fetch(targetUrl, {
         method: editingId ? 'PUT' : 'POST',
         headers: getAuthHeader(),
         body: JSON.stringify({ 
@@ -61,7 +65,8 @@ export default function Goals() {
   const handleDelete = async (id) => {
     if (!window.confirm("Hapus target keuangan ini?")) return;
     try {
-      const res = await fetch(`${API_URL}/goals/${id}`, { method: 'DELETE', headers: getAuthHeader() });
+      // PERBAIKAN: Menambahkan rute /api pada DELETE
+      const res = await fetch(`${baseUrl}/api/goals/${id}`, { method: 'DELETE', headers: getAuthHeader() });
       if (res.ok) fetchGoals();
     } catch (err) { console.error(err); }
   };
