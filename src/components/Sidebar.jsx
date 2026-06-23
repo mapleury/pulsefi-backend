@@ -29,8 +29,13 @@ export const Sidebar = () => {
   const fetchSidebarProfile = async () => {
     const token = localStorage.getItem('pulsefi_token');
     if (!token) return;
+
+    // PERBAIKAN: Membersihkan trailing slash dari environment
+    const baseUrl = API_URL.replace(/\/$/, "");
+
     try {
-      const res = await fetch(`${API_URL}/profile`, {
+      // PERBAIKAN: Menambahkan rute /api agar sesuai dengan backend
+      const res = await fetch(`${baseUrl}/api/profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {

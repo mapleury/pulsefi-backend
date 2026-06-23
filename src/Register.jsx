@@ -14,8 +14,13 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    
     try {
-      const res = await fetch(`${API_URL}/register`, {
+      // PERBAIKAN: Membersihkan trailing slash dan memastikan rutenya /api/register
+      const baseUrl = API_URL.replace(/\/$/, "");
+      const endpoint = `${baseUrl}/api/register`;
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
@@ -30,7 +35,8 @@ export default function Register() {
         setError(data.error || "Gagal membuat akun.");
       }
     } catch (err) {
-      setError("Server PulseFi Offline (Cek Backend)");
+      console.error("Fetch Error:", err);
+      setError("Server PulseFi Offline atau masalah koneksi.");
     } finally {
       setLoading(false);
     }

@@ -8,15 +8,25 @@ export default function Profile() {
   const [passData, setPassData] = useState({ oldPassword: "", newPassword: "" });
   const [loading, setLoading] = useState(false);
 
+  // PERBAIKAN: Membersihkan trailing slash untuk mencegah double slash
+  const baseUrl = API_URL.replace(/\/$/, "");
+
   const getAuthHeader = () => ({
     'Authorization': `Bearer ${localStorage.getItem('pulsefi_token')}`,
     'Content-Type': 'application/json'
   });
 
   const fetchProfile = async () => {
-    const res = await fetch(`${API_URL}/profile`, { headers: getAuthHeader() });
-    const data = await res.json();
-    setProfile(data);
+    try {
+      // PERBAIKAN: Menambahkan rute /api
+      const res = await fetch(`${baseUrl}/api/profile`, { headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error("Gagal mengambil data profil:", error);
+    }
   };
 
   useEffect(() => { fetchProfile(); }, []);
@@ -24,29 +34,47 @@ export default function Profile() {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await fetch(`${API_URL}/profile`, {
-      method: 'PUT',
-      headers: getAuthHeader(),
-      body: JSON.stringify({ name: profile.name, image_url: profile.image_url })
-    });
-    setLoading(false);
-    alert("Profile updated!");
-    localStorage.setItem('pulsefi_user', profile.name);
+    try {
+      // PERBAIKAN: Menambahkan rute /api
+      const res = await fetch(`${baseUrl}/api/profile`, {
+        method: 'PUT',
+        headers: getAuthHeader(),
+        body: JSON.stringify({ name: profile.name, image_url: profile.image_url })
+      });
+      
+      if (res.ok) {
+        alert("Profile updated!");
+        localStorage.setItem('pulsefi_user', profile.name);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal mengupdate profil.");
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan jaringan.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    const res = await fetch(`${API_URL}/profile/password`, {
-      method: 'PUT',
-      headers: getAuthHeader(),
-      body: JSON.stringify(passData)
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert("Password updated!");
-      setPassData({ oldPassword: "", newPassword: "" });
-    } else {
-      alert(data.error);
+    try {
+      // PERBAIKAN: Menambahkan rute /api
+      const res = await fetch(`${baseUrl}/api/profile/password`, {
+        method: 'PUT',
+        headers: getAuthHeader(),
+        body: JSON.stringify(passData)
+      });
+      
+      const data = await res.json();
+      if (res.ok) {
+        alert("Password updated!");
+        setPassData({ oldPassword: "", newPassword: "" });
+      } else {
+        alert(data.error || "Gagal mengubah password.");
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan jaringan.");
     }
   };
 

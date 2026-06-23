@@ -6,12 +6,23 @@ import { API_URL } from "./api";
 export default function Streak() {
   const [streak, setStreak] = useState({ current_streak: 0, longest_streak: 0, is_active_today: false });
 
+  // PERBAIKAN: Membersihkan trailing slash dari environment
+  const baseUrl = API_URL.replace(/\/$/, "");
+
   const fetchStreak = async () => {
-    const res = await fetch(`${API_URL}/profile/streak`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('pulsefi_token')}` }
-    });
-    const d = await res.json();
-    setStreak(d);
+    try {
+      // PERBAIKAN: Menambahkan rute /api agar sesuai dengan backend
+      const res = await fetch(`${baseUrl}/api/profile/streak`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('pulsefi_token')}` }
+      });
+      
+      if (res.ok) {
+        const d = await res.json();
+        setStreak(d);
+      }
+    } catch (error) {
+      console.error("Gagal mengambil data streak:", error);
+    }
   };
 
   useEffect(() => { fetchStreak(); }, []);
